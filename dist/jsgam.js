@@ -2180,7 +2180,7 @@ earcut.flatten = function (data) {
     return result;
 };
 
-},{}],"GtVy":[function(require,module,exports) {
+},{}],"Nw9x":[function(require,module,exports) {
 var global = arguments[3];
 var define;
 /*! https://mths.be/punycode v1.4.1 by @mathias */
@@ -2717,7 +2717,7 @@ var define;
 
 }(this));
 
-},{}],"cG0P":[function(require,module,exports) {
+},{}],"ackw":[function(require,module,exports) {
 'use strict';
 
 module.exports = {
@@ -2735,7 +2735,7 @@ module.exports = {
   }
 };
 
-},{}],"vNSc":[function(require,module,exports) {
+},{}],"AetM":[function(require,module,exports) {
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -2821,7 +2821,7 @@ module.exports = function (qs, sep, eq, options) {
 var isArray = Array.isArray || function (xs) {
   return Object.prototype.toString.call(xs) === '[object Array]';
 };
-},{}],"AUvh":[function(require,module,exports) {
+},{}],"M6xb":[function(require,module,exports) {
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -2910,12 +2910,12 @@ var objectKeys = Object.keys || function (obj) {
 
   return res;
 };
-},{}],"EHkK":[function(require,module,exports) {
+},{}],"j68F":[function(require,module,exports) {
 'use strict';
 
 exports.decode = exports.parse = require('./decode');
 exports.encode = exports.stringify = require('./encode');
-},{"./decode":"vNSc","./encode":"AUvh"}],"IahG":[function(require,module,exports) {
+},{"./decode":"AetM","./encode":"M6xb"}],"ga6P":[function(require,module,exports) {
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -3649,7 +3649,7 @@ Url.prototype.parseHost = function() {
   if (host) this.hostname = host;
 };
 
-},{"punycode":"GtVy","./util":"cG0P","querystring":"EHkK"}],"LQBK":[function(require,module,exports) {
+},{"punycode":"Nw9x","./util":"ackw","querystring":"j68F"}],"LQBK":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -5168,7 +5168,7 @@ function getResolutionOfUrl(url, defaultValue) {
  * console.log(PIXI.utils.hex2string(0xff00ff)); // returns: "#ff00ff"
  * @namespace PIXI.utils
  */
-},{"@pixi/settings":"t4Uo","eventemitter3":"JJlS","earcut":"vwhv","url":"IahG","@pixi/constants":"LQBK"}],"oNQC":[function(require,module,exports) {
+},{"@pixi/settings":"t4Uo","eventemitter3":"JJlS","earcut":"vwhv","url":"ga6P","@pixi/constants":"LQBK"}],"oNQC":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
