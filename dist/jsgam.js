@@ -56165,7 +56165,275 @@ PixiPlugin.colorStringFilter = _colorStringFilter;
 PixiPlugin.registerPIXI = function (PIXI) {
   _TweenLite._gsScope.PIXI = PIXI;
 };
-},{"./TweenLite.js":"PWbO"}],"lyKV":[function(require,module,exports) {
+},{"./TweenLite.js":"PWbO"}],"T51w":[function(require,module,exports) {
+var define;
+/*
+* loglevel - https://github.com/pimterry/loglevel
+*
+* Copyright (c) 2013 Tim Perry
+* Licensed under the MIT license.
+*/
+(function (root, definition) {
+  "use strict";
+
+  if (typeof define === 'function' && define.amd) {
+    define(definition);
+  } else if (typeof module === 'object' && module.exports) {
+    module.exports = definition();
+  } else {
+    root.log = definition();
+  }
+})(this, function () {
+  "use strict"; // Slightly dubious tricks to cut down minimized file size
+
+  var noop = function () {};
+
+  var undefinedType = "undefined";
+  var isIE = typeof window !== undefinedType && typeof window.navigator !== undefinedType && /Trident\/|MSIE /.test(window.navigator.userAgent);
+  var logMethods = ["trace", "debug", "info", "warn", "error"]; // Cross-browser bind equivalent that works at least back to IE6
+
+  function bindMethod(obj, methodName) {
+    var method = obj[methodName];
+
+    if (typeof method.bind === 'function') {
+      return method.bind(obj);
+    } else {
+      try {
+        return Function.prototype.bind.call(method, obj);
+      } catch (e) {
+        // Missing bind shim or IE8 + Modernizr, fallback to wrapping
+        return function () {
+          return Function.prototype.apply.apply(method, [obj, arguments]);
+        };
+      }
+    }
+  } // Trace() doesn't print the message in IE, so for that case we need to wrap it
+
+
+  function traceForIE() {
+    if (console.log) {
+      if (console.log.apply) {
+        console.log.apply(console, arguments);
+      } else {
+        // In old IE, native console methods themselves don't have apply().
+        Function.prototype.apply.apply(console.log, [console, arguments]);
+      }
+    }
+
+    if (console.trace) console.trace();
+  } // Build the best logging method possible for this env
+  // Wherever possible we want to bind, not wrap, to preserve stack traces
+
+
+  function realMethod(methodName) {
+    if (methodName === 'debug') {
+      methodName = 'log';
+    }
+
+    if (typeof console === undefinedType) {
+      return false; // No method possible, for now - fixed later by enableLoggingWhenConsoleArrives
+    } else if (methodName === 'trace' && isIE) {
+      return traceForIE;
+    } else if (console[methodName] !== undefined) {
+      return bindMethod(console, methodName);
+    } else if (console.log !== undefined) {
+      return bindMethod(console, 'log');
+    } else {
+      return noop;
+    }
+  } // These private functions always need `this` to be set properly
+
+
+  function replaceLoggingMethods(level, loggerName) {
+    /*jshint validthis:true */
+    for (var i = 0; i < logMethods.length; i++) {
+      var methodName = logMethods[i];
+      this[methodName] = i < level ? noop : this.methodFactory(methodName, level, loggerName);
+    } // Define log.log as an alias for log.debug
+
+
+    this.log = this.debug;
+  } // In old IE versions, the console isn't present until you first open it.
+  // We build realMethod() replacements here that regenerate logging methods
+
+
+  function enableLoggingWhenConsoleArrives(methodName, level, loggerName) {
+    return function () {
+      if (typeof console !== undefinedType) {
+        replaceLoggingMethods.call(this, level, loggerName);
+        this[methodName].apply(this, arguments);
+      }
+    };
+  } // By default, we use closely bound real methods wherever possible, and
+  // otherwise we wait for a console to appear, and then try again.
+
+
+  function defaultMethodFactory(methodName, level, loggerName) {
+    /*jshint validthis:true */
+    return realMethod(methodName) || enableLoggingWhenConsoleArrives.apply(this, arguments);
+  }
+
+  function Logger(name, defaultLevel, factory) {
+    var self = this;
+    var currentLevel;
+    var storageKey = "loglevel";
+
+    if (name) {
+      storageKey += ":" + name;
+    }
+
+    function persistLevelIfPossible(levelNum) {
+      var levelName = (logMethods[levelNum] || 'silent').toUpperCase();
+      if (typeof window === undefinedType) return; // Use localStorage if available
+
+      try {
+        window.localStorage[storageKey] = levelName;
+        return;
+      } catch (ignore) {} // Use session cookie as fallback
+
+
+      try {
+        window.document.cookie = encodeURIComponent(storageKey) + "=" + levelName + ";";
+      } catch (ignore) {}
+    }
+
+    function getPersistedLevel() {
+      var storedLevel;
+      if (typeof window === undefinedType) return;
+
+      try {
+        storedLevel = window.localStorage[storageKey];
+      } catch (ignore) {} // Fallback to cookies if local storage gives us nothing
+
+
+      if (typeof storedLevel === undefinedType) {
+        try {
+          var cookie = window.document.cookie;
+          var location = cookie.indexOf(encodeURIComponent(storageKey) + "=");
+
+          if (location !== -1) {
+            storedLevel = /^([^;]+)/.exec(cookie.slice(location))[1];
+          }
+        } catch (ignore) {}
+      } // If the stored level is not valid, treat it as if nothing was stored.
+
+
+      if (self.levels[storedLevel] === undefined) {
+        storedLevel = undefined;
+      }
+
+      return storedLevel;
+    }
+    /*
+     *
+     * Public logger API - see https://github.com/pimterry/loglevel for details
+     *
+     */
+
+
+    self.name = name;
+    self.levels = {
+      "TRACE": 0,
+      "DEBUG": 1,
+      "INFO": 2,
+      "WARN": 3,
+      "ERROR": 4,
+      "SILENT": 5
+    };
+    self.methodFactory = factory || defaultMethodFactory;
+
+    self.getLevel = function () {
+      return currentLevel;
+    };
+
+    self.setLevel = function (level, persist) {
+      if (typeof level === "string" && self.levels[level.toUpperCase()] !== undefined) {
+        level = self.levels[level.toUpperCase()];
+      }
+
+      if (typeof level === "number" && level >= 0 && level <= self.levels.SILENT) {
+        currentLevel = level;
+
+        if (persist !== false) {
+          // defaults to true
+          persistLevelIfPossible(level);
+        }
+
+        replaceLoggingMethods.call(self, level, name);
+
+        if (typeof console === undefinedType && level < self.levels.SILENT) {
+          return "No console available for logging";
+        }
+      } else {
+        throw "log.setLevel() called with invalid level: " + level;
+      }
+    };
+
+    self.setDefaultLevel = function (level) {
+      if (!getPersistedLevel()) {
+        self.setLevel(level, false);
+      }
+    };
+
+    self.enableAll = function (persist) {
+      self.setLevel(self.levels.TRACE, persist);
+    };
+
+    self.disableAll = function (persist) {
+      self.setLevel(self.levels.SILENT, persist);
+    }; // Initialize with the right level
+
+
+    var initialLevel = getPersistedLevel();
+
+    if (initialLevel == null) {
+      initialLevel = defaultLevel == null ? "WARN" : defaultLevel;
+    }
+
+    self.setLevel(initialLevel, false);
+  }
+  /*
+   *
+   * Top-level API
+   *
+   */
+
+
+  var defaultLogger = new Logger();
+  var _loggersByName = {};
+
+  defaultLogger.getLogger = function getLogger(name) {
+    if (typeof name !== "string" || name === "") {
+      throw new TypeError("You must supply a name when creating a logger.");
+    }
+
+    var logger = _loggersByName[name];
+
+    if (!logger) {
+      logger = _loggersByName[name] = new Logger(name, defaultLogger.getLevel(), defaultLogger.methodFactory);
+    }
+
+    return logger;
+  }; // Grab the current global log variable in case of overwrite
+
+
+  var _log = typeof window !== undefinedType ? window.log : undefined;
+
+  defaultLogger.noConflict = function () {
+    if (typeof window !== undefinedType && window.log === defaultLogger) {
+      window.log = _log;
+    }
+
+    return defaultLogger;
+  };
+
+  defaultLogger.getLoggers = function getLoggers() {
+    return _loggersByName;
+  };
+
+  return defaultLogger;
+});
+},{}],"lyKV":[function(require,module,exports) {
 var define;
 var global = arguments[3];
 /*!
@@ -59337,6 +59605,10 @@ var _howler = require("howler");
 
 var _pixi = require("pixi.js");
 
+var _loglevel = _interopRequireDefault(require("loglevel"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -59358,6 +59630,8 @@ function _assertThisInitialized(self) { if (self === void 0) { throw new Referen
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
 
 function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+_loglevel.default.setLevel('trace');
 
 var GameLoader = /*#__PURE__*/function (_Loader) {
   _inherits(GameLoader, _Loader);
@@ -59408,6 +59682,7 @@ var GameLoader = /*#__PURE__*/function (_Loader) {
   }, {
     key: "addFiles",
     value: function addFiles(files) {
+      //log.debug('loader.js addFiles', files);
       var i;
       var length = files.length;
 
@@ -59484,10 +59759,13 @@ var GameLoader = /*#__PURE__*/function (_Loader) {
             if (tmpBg !== null) this.add(bgSrc[_i3].Name, tmpBg);
           }
         } //Look for player files
+        //log.debug("loader.js: look for player files");
 
 
         if (files[i].data.Player) {
-          this.add('playerTex', files[i].data.Player.Texture).add('playerJson', files[i].data.Player.Json).add('playerSkeleton', files[i].data.Player.Skeleton);
+          if (files[i].data.Player.Texture) this.add('playerTex', files[i].data.Player.Texture);
+          if (files[i].data.Player.Json) this.add('playerJson', files[i].data.Player.Json);
+          if (files[i].data.Player.Skeleton) this.add('playerSkeleton', files[i].data.Player.Skeleton);
           this.game.data.player = files[i].data.Player;
         } //Look for NPC files
 
@@ -59523,7 +59801,7 @@ var GameLoader = /*#__PURE__*/function (_Loader) {
 
 var _default = GameLoader;
 exports.default = _default;
-},{"howler":"lyKV","pixi.js":"wbEC"}],"EM1A":[function(require,module,exports) {
+},{"howler":"lyKV","pixi.js":"wbEC","loglevel":"T51w"}],"EM1A":[function(require,module,exports) {
 var define;
 var global = arguments[3];
 /*!
@@ -62384,10 +62662,12 @@ var Storage = /*#__PURE__*/function () {
         if (cutscene.played) cutscenesPlayed.push(cutscene.config.Name);
       }); //Store the progress
 
+      var pos = [0, 0];
+      if (this.game.player.sprite) pos = [this.game.player.sprite.x, this.game.player.sprite.y];
       this.progress = {
         language: this.game.activeLanguage,
         latestScene: this.game.activeScene.config.Name,
-        playerPos: [this.game.player.sprite.x, this.game.player.sprite.y],
+        playerPos: pos,
         inventory: this.game.inventory.objects,
         puzzles: puzzlesSolved,
         dialogues: dialoguesDisabled,
@@ -87672,6 +87952,10 @@ var PIXI = _interopRequireWildcard(require("pixi.js"));
 
 var _collisions = require("../collisions.js");
 
+var _loglevel = _interopRequireDefault(require("loglevel"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
@@ -87688,6 +87972,8 @@ var dragonBones = require('pixi5-dragonbones');
 
 var dbfactory = dragonBones.PixiFactory.factory;
 
+_loglevel.default.setLevel('trace');
+
 var Character = /*#__PURE__*/function () {
   function Character() {
     _classCallCheck(this, Character);
@@ -87702,13 +87988,14 @@ var Character = /*#__PURE__*/function () {
   _createClass(Character, [{
     key: "setup",
     value: function setup(config) {
-      dbfactory.parseDragonBonesData(this.game.files.resources[config.Name + "Skeleton"].data);
-      dbfactory.parseTextureAtlasData(this.game.files.resources[config.Name + "Json"].data, this.game.files.resources[config.Name + "Tex"].texture);
-      this.sprite = dbfactory.buildArmatureDisplay(config.Armature);
+      //log.trace('setup character...', config);
+      if (this.game.files.resources[config.Name + "Skeleton"]) dbfactory.parseDragonBonesData(this.game.files.resources[config.Name + "Skeleton"].data);
+      if (this.game.files.resources[config.Name + "Json"] && this.game.files.resources[config.Name + "Tex"]) dbfactory.parseTextureAtlasData(this.game.files.resources[config.Name + "Json"].data, this.game.files.resources[config.Name + "Tex"].texture);
+      if (config.Armature) this.sprite = dbfactory.buildArmatureDisplay(config.Armature);
 
       if (config.Size !== undefined) {
         this.size = config.Size;
-        this.sprite.scale.set(this.size);
+        if (this.sprite) this.sprite.scale.set(this.size);
       } else {
         this.size = 1;
       }
@@ -87724,39 +88011,44 @@ var Character = /*#__PURE__*/function () {
       this.animate(this.animations.Stand);
       this.state = "stand";
 
-      if (config.Position) {
+      if (this.sprite && config.Position) {
         this.sprite.x = config.Position[0];
         this.sprite.y = config.Position[1];
       }
 
-      this.sprite.parentLayer = this.game.layer; //Z-order*/
+      if (this.sprite) this.sprite.parentLayer = this.game.layer; //Z-order*/
 
       this.config = config;
     }
   }, {
     key: "hide",
     value: function hide() {
+      if (!this.sprite) return;
       this.sprite.visible = false;
     }
   }, {
     key: "show",
     value: function show() {
+      if (!this.sprite) return;
       this.sprite.visible = true;
     }
   }, {
     key: "width",
     value: function width() {
+      if (!this.sprite) return;
       return this.sprite.getBounds().width;
     }
   }, {
     key: "position",
     value: function position(coords) {
+      if (!this.sprite) return;
       this.sprite.x = coords[0];
       this.sprite.y = coords[1];
     }
   }, {
     key: "move",
     value: function move(coords) {
+      if (!this.sprite) return;
       var obstacles = this.game.activeScene.config.Obstacles;
       var walkingArea = this.game.activeScene.config.WalkArea;
       var newPosition = coords;
@@ -87802,6 +88094,7 @@ var Character = /*#__PURE__*/function () {
   }, {
     key: "scale",
     value: function scale() {
+      if (!this.sprite) return;
       var scaleChar = this.sprite.y / this.game.height * this.size;
       if (scaleChar < this.game.activeScene.config.Depth) scaleChar = this.game.activeScene.config.Depth;
       this.sprite.scale.set(scaleChar);
@@ -87852,6 +88145,7 @@ var Character = /*#__PURE__*/function () {
   }, {
     key: "animate",
     value: function animate(animation, times) {
+      if (!this.sprite) return;
       if (this.sprite.animation.lastAnimationName !== animation) this.sprite.animation.fadeIn(animation, 0.25, times);
     }
   }]);
@@ -87861,7 +88155,7 @@ var Character = /*#__PURE__*/function () {
 
 var _default = Character;
 exports.default = _default;
-},{"pixi.js":"wbEC","pixi5-dragonbones":"EUnr","../collisions.js":"vZYL"}],"LKzY":[function(require,module,exports) {
+},{"pixi.js":"wbEC","pixi5-dragonbones":"EUnr","../collisions.js":"vZYL","loglevel":"T51w"}],"LKzY":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -88482,6 +88776,8 @@ var _gsap = require("gsap");
 
 var _PixiPlugin = _interopRequireDefault(require("gsap/PixiPlugin"));
 
+var _loglevel = _interopRequireDefault(require("loglevel"));
+
 var _loader = _interopRequireDefault(require("./loader.js"));
 
 var _storage = _interopRequireDefault(require("./storage.js"));
@@ -88543,6 +88839,16 @@ window.PIXI = PIXI; //Solution to use pixi-layers with PIXI v5
 require("pixi-layers");
 
 _PixiPlugin.default.registerPIXI(PIXI);
+/*
+log.trace(msg)
+log.debug(msg)
+log.info(msg)
+log.warn(msg)
+log.error(msg)
+*/
+
+
+_loglevel.default.setLevel('trace');
 
 var Game = /*#__PURE__*/function () {
   function Game(config) {
@@ -88584,6 +88890,7 @@ var Game = /*#__PURE__*/function () {
     } else {
       document.body.appendChild(this.app.view);
     } //Load config files
+    //log.trace("loading config files", config.files);
 
 
     this.preload(config.files);
@@ -88618,6 +88925,7 @@ var Game = /*#__PURE__*/function () {
       this.jsons.game = this;
       this.jsons.addJSON(files);
       this.jsons.load(this.load.bind(this)); //When all config files are loaded, load the game resources.
+      //log.trace('Preload end.');
     } //Load game resources (images,sounds,vids...)
 
   }, {
@@ -88866,6 +89174,7 @@ var Game = /*#__PURE__*/function () {
   }, {
     key: "addPlayer",
     value: function addPlayer() {
+      //log.trace('Adding player');
       this.player = new _player.default();
       this.player.game = this;
       this.data.player.Name = "player";
@@ -88923,7 +89232,7 @@ var Game = /*#__PURE__*/function () {
       this.app.stage.addChild(this.inventory.container);
       this.app.stage.addChild(this.inventory.icon); //Show Player
 
-      this.app.stage.addChild(this.player.sprite); //Add Text Field
+      if (this.player.sprite) this.app.stage.addChild(this.player.sprite); //Add Text Field
 
       this.app.stage.addChild(this.textField.container);
     }
@@ -88990,7 +89299,8 @@ var Game = /*#__PURE__*/function () {
   }, {
     key: "changeScene",
     value: function changeScene(name, playerCoords) {
-      //Stop the current music playing
+      console.log('changeScene', name, playerCoords); //Stop the current music playing
+
       if (this.activeScene.music !== undefined && this.playSounds) {
         this.music[this.activeScene.music].stop();
       }
@@ -89057,7 +89367,7 @@ var Game = /*#__PURE__*/function () {
 
 var _default = Game;
 exports.default = _default;
-},{"pixi.js":"wbEC","pixi-layers":"hSFE","gsap":"TpQl","gsap/PixiPlugin":"Y7PD","./loader.js":"cGmI","./storage.js":"KZ7Y","./sound.js":"GOKF","./class/title.js":"xJND","./class/gamescene.js":"Bkuk","./class/cutscene.js":"LMeo","./class/gameobject.js":"koTY","./class/inventory.js":"cAfK","./class/puzzle.js":"v2k2","./class/text.js":"EwzB","./class/player.js":"LKzY","./class/npc.js":"NQ1q","./class/dialogue.js":"JL1J","./class/logo.js":"n7v1","./class/progressbar.js":"CN57"}],"Focm":[function(require,module,exports) {
+},{"pixi.js":"wbEC","pixi-layers":"hSFE","gsap":"TpQl","gsap/PixiPlugin":"Y7PD","loglevel":"T51w","./loader.js":"cGmI","./storage.js":"KZ7Y","./sound.js":"GOKF","./class/title.js":"xJND","./class/gamescene.js":"Bkuk","./class/cutscene.js":"LMeo","./class/gameobject.js":"koTY","./class/inventory.js":"cAfK","./class/puzzle.js":"v2k2","./class/text.js":"EwzB","./class/player.js":"LKzY","./class/npc.js":"NQ1q","./class/dialogue.js":"JL1J","./class/logo.js":"n7v1","./class/progressbar.js":"CN57"}],"Focm":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {

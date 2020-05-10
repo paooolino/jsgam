@@ -48,10 +48,13 @@ export default class Storage{
     });
 
     //Store the progress
+    var pos = [0, 0];
+    if (this.game.player.sprite)
+      pos = [this.game.player.sprite.x,this.game.player.sprite.y];
     this.progress={
       language:this.game.activeLanguage,
       latestScene:this.game.activeScene.config.Name,
-      playerPos:[this.game.player.sprite.x,this.game.player.sprite.y],
+      playerPos:pos,
       inventory:this.game.inventory.objects,
       puzzles:puzzlesSolved,
       dialogues:dialoguesDisabled,

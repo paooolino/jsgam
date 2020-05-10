@@ -6,6 +6,16 @@ import { TweenMax } from "gsap";
 import PixiPlugin from "gsap/PixiPlugin";
 PixiPlugin.registerPIXI(PIXI);
 
+/*
+log.trace(msg)
+log.debug(msg)
+log.info(msg)
+log.warn(msg)
+log.error(msg)
+*/
+import log from 'loglevel';
+log.setLevel('trace');
+
 import GameLoader from './loader.js';
 import Storage from './storage.js';
 import Sound from './sound.js';
@@ -69,6 +79,7 @@ class Game {
     }
 
     //Load config files
+    //log.trace("loading config files", config.files);
     this.preload(config.files);
   }
 
@@ -98,6 +109,7 @@ class Game {
     this.jsons.game=this;
     this.jsons.addJSON(files);
     this.jsons.load(this.load.bind(this)); //When all config files are loaded, load the game resources.
+    //log.trace('Preload end.');
   }
 
   //Load game resources (images,sounds,vids...)
@@ -375,6 +387,7 @@ class Game {
   }
 
   addPlayer(){
+    //log.trace('Adding player');
     this.player=new Player();
     this.player.game=this;
     this.data.player.Name="player";
@@ -431,7 +444,8 @@ class Game {
     this.app.stage.addChild(this.inventory.icon);
 
     //Show Player
-    this.app.stage.addChild(this.player.sprite);
+    if (this.player.sprite)
+      this.app.stage.addChild(this.player.sprite);
 
     //Add Text Field
     this.app.stage.addChild(this.textField.container);
@@ -492,6 +506,7 @@ class Game {
   }
 
   changeScene(name,playerCoords){
+    console.log('changeScene', name, playerCoords);
     //Stop the current music playing
     if(this.activeScene.music!==undefined && this.playSounds){
       this.music[this.activeScene.music].stop();

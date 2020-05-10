@@ -1,6 +1,16 @@
 import {Howl} from 'howler';
 import {Loader} from 'pixi.js';
 
+/*
+log.trace(msg)
+log.debug(msg)
+log.info(msg)
+log.warn(msg)
+log.error(msg)
+*/
+import log from 'loglevel';
+log.setLevel('trace');
+
 class GameLoader extends Loader{
   constructor(){
     super();
@@ -33,6 +43,8 @@ class GameLoader extends Loader{
 
   //Add resource files to loader and settings to game
   addFiles(files){
+    //log.debug('loader.js addFiles', files);
+    
     let i;
     let length=files.length
     for(i=0;i<length;i++){
@@ -107,11 +119,15 @@ class GameLoader extends Loader{
        }
 
        //Look for player files
+       //log.debug("loader.js: look for player files");
        if(files[i].data.Player){
-         this.add('playerTex', files[i].data.Player.Texture)
-             .add('playerJson', files[i].data.Player.Json)
-             .add('playerSkeleton', files[i].data.Player.Skeleton);
-         this.game.data.player=files[i].data.Player;
+        if (files[i].data.Player.Texture)
+          this.add('playerTex', files[i].data.Player.Texture);
+        if (files[i].data.Player.Json)
+          this.add('playerJson', files[i].data.Player.Json);
+        if (files[i].data.Player.Skeleton)
+          this.add('playerSkeleton', files[i].data.Player.Skeleton);
+        this.game.data.player=files[i].data.Player;
        }
 
        //Look for NPC files

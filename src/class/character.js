@@ -5,6 +5,16 @@ const dbfactory=dragonBones.PixiFactory.factory;
 
 import {checkPath} from '../collisions.js'
 
+/*
+log.trace(msg)
+log.debug(msg)
+log.info(msg)
+log.warn(msg)
+log.error(msg)
+*/
+import log from 'loglevel';
+log.setLevel('trace');
+
 class Character{
   constructor(){
     this.game=null;
@@ -15,12 +25,21 @@ class Character{
   }
 
   setup(config){
-    dbfactory.parseDragonBonesData(this.game.files.resources[config.Name+"Skeleton"].data);
-    dbfactory.parseTextureAtlasData(this.game.files.resources[config.Name+"Json"].data,this.game.files.resources[config.Name+"Tex"].texture);
-    this.sprite = dbfactory.buildArmatureDisplay(config.Armature);
+    //log.trace('setup character...', config);
+    if (this.game.files.resources[config.Name+"Skeleton"])
+      dbfactory.parseDragonBonesData(this.game.files.resources[config.Name+"Skeleton"].data);
+    if (
+      this.game.files.resources[config.Name+"Json"]
+      && this.game.files.resources[config.Name+"Tex"]
+    )
+      dbfactory.parseTextureAtlasData(this.game.files.resources[config.Name+"Json"].data,this.game.files.resources[config.Name+"Tex"].texture);
+    
+    if (config.Armature)
+      this.sprite = dbfactory.buildArmatureDisplay(config.Armature);
     if(config.Size!==undefined){
       this.size=config.Size;
-      this.sprite.scale.set(this.size);
+      if (this.sprite)
+        this.sprite.scale.set(this.size);
     }else{
       this.size=1;
     }
@@ -37,32 +56,48 @@ class Character{
       };
     this.animate(this.animations.Stand);
     this.state="stand";
-    if(config.Position){
+    if(this.sprite && config.Position){
       this.sprite.x=config.Position[0];
       this.sprite.y=config.Position[1];
     }
-    this.sprite.parentLayer = this.game.layer;//Z-order*/
+    if (this.sprite)
+      this.sprite.parentLayer = this.game.layer;//Z-order*/
     this.config=config;
   }
 
   hide(){
+    if (!this.sprite)
+      return;
+    
     this.sprite.visible=false;
   }
 
   show(){
+    if (!this.sprite)
+      return;
+    
     this.sprite.visible=true;
   }
 
   width(){
+    if (!this.sprite)
+      return;
+    
     return this.sprite.getBounds().width;
   }
 
   position(coords){
+    if (!this.sprite)
+      return;
+    
     this.sprite.x=coords[0];
     this.sprite.y=coords[1];
   }
 
   move(coords){
+    if (!this.sprite)
+      return;
+    
     let obstacles=this.game.activeScene.config.Obstacles;
     let walkingArea=this.game.activeScene.config.WalkArea;
     let newPosition=coords;
@@ -102,6 +137,8 @@ class Character{
   }
 
   scale(){
+    if (!this.sprite)
+      return;
     let scaleChar=this.sprite.y/this.game.height*this.size;
     if(scaleChar<this.game.activeScene.config.Depth) scaleChar=this.game.activeScene.config.Depth;
     this.sprite.scale.set(scaleChar);
@@ -151,6 +188,8 @@ class Character{
   }
 
   animate(animation,times){
+    if (!this.sprite)
+      return;
     if(this.sprite.animation.lastAnimationName!==animation)
       this.sprite.animation.fadeIn(animation,0.25,times);
   }
