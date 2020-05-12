@@ -12,10 +12,12 @@ class Player extends Character{
   checkDirection(target){
     //Player must look in the right direction
     if(target.config.Area===undefined){
-      if(this.sprite.x<target.sprite.x){
-        this.sprite.armature.flipX=false;
-      }else{
-        this.sprite.armature.flipX=true;
+      if (this.sprite) {
+        if(this.sprite.x<target.sprite.x){
+          this.sprite.armature.flipX=false;
+        }else{
+          this.sprite.armature.flipX=true;
+        }
       }
     }
   }

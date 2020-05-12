@@ -71431,6 +71431,8 @@ var GameObject = /*#__PURE__*/function () {
   }, {
     key: "release",
     value: function release() {
+      console.log('release');
+      console.log('interaction:', this.interaction);
       if (this.timeoutID) clearTimeout(this.timeoutID);
 
       if (this.interaction) {
@@ -71448,9 +71450,16 @@ var GameObject = /*#__PURE__*/function () {
           this.action = "Look";
         }
 
+        console.log("action is:", this.action);
+
         if (this.action !== null) {
           this.game.player.endAction = this.action;
-          this.game.player.move(moveTo);
+
+          if (this.game.player.sprite) {
+            this.game.player.move(moveTo);
+          } else {
+            this.game.player.stop();
+          }
         } else {
           this.cancel();
         }
@@ -88219,10 +88228,12 @@ var Player = /*#__PURE__*/function (_Character) {
     value: function checkDirection(target) {
       //Player must look in the right direction
       if (target.config.Area === undefined) {
-        if (this.sprite.x < target.sprite.x) {
-          this.sprite.armature.flipX = false;
-        } else {
-          this.sprite.armature.flipX = true;
+        if (this.sprite) {
+          if (this.sprite.x < target.sprite.x) {
+            this.sprite.armature.flipX = false;
+          } else {
+            this.sprite.armature.flipX = true;
+          }
         }
       }
     }

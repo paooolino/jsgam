@@ -198,6 +198,8 @@ this.timeoutID;
 
   //Object drag/touch ends
   release(){
+    console.log('release');
+    console.log('interaction:', this.interaction);
     if(this.timeoutID) clearTimeout(this.timeoutID);
 
     if(this.interaction){
@@ -213,9 +215,14 @@ this.timeoutID;
         this.action="Look";
       }
 
+      console.log("action is:", this.action);
       if(this.action!==null){
         this.game.player.endAction=this.action;
-        this.game.player.move(moveTo);
+        if (this.game.player.sprite) {
+          this.game.player.move(moveTo);
+        } else {
+          this.game.player.stop();
+        }
       }else{
         this.cancel();
       }
