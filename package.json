@@ -30,6 +30,7 @@
     "howler": "^2.1.2",
     "localforage": "^1.7.3",
     "loglevel": "^1.6.8",
+    "pixi-filters": "^3.1.1",
     "pixi-layers": "^0.2.1",
     "pixi.js": "^5.2.3",
     "pixi5-dragonbones": "^5.7.0-2",
