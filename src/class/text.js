@@ -1,17 +1,28 @@
 import {BitmapText} from 'pixi.js';
 
 class Button extends BitmapText{
-    constructor(text,style){
-      super(text,style);
-      this.interactive=true;
-      this.buttonMode=true;
-    }
+  constructor(text, style, hoverFilter){
+    super(text, style);
+    this.interactive = true;
+    this.buttonMode = true;
+    this.hoverFilter = hoverFilter || [];
+    this.on('pointerover', this.pointerover.bind(this));
+    this.on('pointerout', this.pointerout.bind(this));
+  }
+  
+  pointerover() {
+    this.filters = this.hoverFilter;
+  }
+  
+  pointerout() {
+    this.filters = [];
+  }
 }
 
 class Infotxt extends BitmapText{
-    constructor(text,style){
-      super(text,style);
-    }
+  constructor(text,style){
+    super(text,style);
+  }
 }
 
 
