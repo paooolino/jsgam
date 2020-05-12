@@ -1,0 +1,20 @@
+{"frames": {
+
+"bedroom.png":
+{
+	"frame": {"x":0,"y":0,"w":800,"h":450},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":800,"h":450},
+	"sourceSize": {"w":800,"h":450}
+}},
+"meta": {
+	"app": "https://www.codeandweb.com/texturepacker",
+	"version": "1.0",
+	"image": "backgrounds.png",
+	"format": "RGBA8888",
+	"size": {"w":800,"h":450},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:673d0b27d5922e9020c3b8c116177f72:6670e83a3c17b2fd8c9d85ef17304bed:f1d160bc8f29cda58a3095e4596a0f13$"
+}
+}

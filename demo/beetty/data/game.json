@@ -1,0 +1,144 @@
+{
+  "Settings": {
+    "Languages": [
+      "English"
+    ],
+    "Text": {
+      "Style": {
+        "font": {
+          "name": "Permanent Marker",
+          "size": 32
+        },
+        "align": "center"
+      },
+      "Button": {
+        "font": {
+          "name": "Permanent Marker",
+          "size": 48
+        },
+        "align": "center"
+      }
+    },
+    "TitleScreen": {
+      "Background": "bedroom.png"
+    },
+    "FirstScene": "Bedroom",
+    "Inventory": {
+      "Position": "bottom-right",
+      "Background": "inventory-background.jpg",
+      "Icon": "travelbag.png"
+    }
+  },
+  "Texts": {
+    "Title": [
+      "New Adventure"
+    ],
+    "NewGame": [
+      "New game"
+    ],
+    "Continue": [
+      "Continue"
+    ],
+    "Options": [
+      "Options"
+    ],
+    "Help": [
+      "Help"
+    ],
+    "Credits": [
+      "Credits"
+    ],
+    "Back": [
+      "Back"
+    ],
+    "Warning": [
+      "Warning"
+    ],
+    "Yes": [
+      "Yes"
+    ],
+    "No": [
+      "No"
+    ],
+    "NotUsable": [
+      "It doesn't work"
+    ],
+    "NoDescription": [
+      "I don't know what to say"
+    ]
+  },
+  "Player": {
+    "Avatar": "beetty-avatar.png"
+  },
+  "Objects": [
+    {
+      "Name": "bowl-empty",
+      "Texture": "bowl-empty.png",
+      "Description": [
+        "It is empty. Steward must be hungry."
+      ],
+      "Size": 0.70,
+      "Position": [60, 440]
+    },
+    {
+      "Name": "cat-resting",
+      "Texture": "cat-resting.png",
+      "Description": [
+        "It's Steward. He is so cute when he sleeps."
+      ],
+      "Size": 0.30,
+      "Position": [300, 175]
+    },
+    {
+      "Name": "catfood",
+      "Texture": "catfood.png",
+      "Description": [
+        "It's Steward favourite food."
+      ],
+      "Size": 0.35,
+      "Position": [240, 320]
+    },
+    {
+      "Name": "clock",
+      "Texture": "clock.png",
+      "Position": [570, 100],
+      "Size": 0.30,
+      "Description": [
+        "It's time to go to work!"
+      ]
+    },
+    {
+      "Name": "keys",
+      "Texture": "keys.png",
+      "Description": [
+        "My house keys! Finally I found them."
+      ],
+      "Size": 0.20,
+      "Position": [300, 170],
+      "Take": true
+    },
+    {
+      "Name": "mirror",
+      "Texture": "mirror.png",
+      "Description": [
+        "My big mirror."
+      ],
+      "Size": 0.60,
+      "Position": [740, 420]
+    }
+  ],
+  "Scenes": [
+    {
+      "Name": "Bedroom",
+      "Background": "bedroom.png",
+      "Objects": [
+        "bowl-empty",
+        "cat-resting",
+        "catfood",
+        "clock",
+        "keys",
+        "mirror"
+      ]
+    }
+  ]
+}

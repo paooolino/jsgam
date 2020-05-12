@@ -1,0 +1,80 @@
+{
+  "Settings": {
+    "Languages": [
+      "English"
+    ],
+    "Text": {
+      "Style": {
+        "font": {
+          "name": "m5x7",
+          "size": 24
+        },
+        "align": "center"
+      },
+      "Button": {
+        "font": {
+          "name": "m5x7",
+          "size": 32
+        },
+        "align": "center"
+      }
+    },
+    "TitleScreen": {
+      "Background": "bedroom.png"
+    },
+    "FirstScene": "Bedroom",
+    "Inventory": {
+      "Position": "bottom-right",
+      "Background": "inventory-background.jpg",
+      "Icon": "travelbag.png"
+    }
+  },
+  "Texts": {
+    "Title": [
+      "New Adventure"
+    ],
+    "NewGame": [
+      "New game"
+    ],
+    "Continue": [
+      "Continue"
+    ],
+    "Options": [
+      "Options"
+    ],
+    "Help": [
+      "Help"
+    ],
+    "Credits": [
+      "Credits"
+    ],
+    "Back": [
+      "Back"
+    ],
+    "Warning": [
+      "Warning"
+    ],
+    "Yes": [
+      "Yes"
+    ],
+    "No": [
+      "No"
+    ],
+    "NotUsable": [
+      "It doesn't work"
+    ],
+    "NoDescription": [
+      "I don't know what to say"
+    ]
+  },
+  "Player": {
+    "Avatar": "beetty-avatar.png"
+  },
+  "Objects": [],
+  "Scenes": [
+    {
+      "Name": "Bedroom",
+      "Background": "bedroom.png"
+    }
+  ]
+}
