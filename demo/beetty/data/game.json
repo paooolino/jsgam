@@ -78,10 +78,22 @@
         "It is empty. Steward must be hungry."
       ],
       "Size": 0.70,
+      "Lock": true,
+      "Position": [60, 440]
+    },
+    {
+      "Name": "bowl-filled",
+      "Texture": "bowl-filled.png",
+      "Description": [
+        "Yummy!"
+      ],
+      "Size": 0.70,
+      "Lock": true,
       "Position": [60, 440]
     },
     {
       "Name": "cat-resting",
+      "Lock": "true",
       "Texture": "cat-resting.png",
       "Description": [
         "It's Steward. He is so cute when he sleeps."
@@ -96,13 +108,19 @@
         "It's Steward favourite food."
       ],
       "Size": 0.35,
-      "Position": [240, 320]
+      "Take": true,
+      "Position": [240, 320],
+      "Combine": {
+        "With": "bowl-empty",
+        "Puzzle": "fill-bowl"
+      }
     },
     {
       "Name": "clock",
       "Texture": "clock.png",
       "Position": [570, 100],
       "Size": 0.30,
+      "Lock": true,
       "Description": [
         "It's time to go to work!"
       ]
@@ -123,6 +141,7 @@
       "Description": [
         "My big mirror."
       ],
+      "Lock": true,
       "Size": 0.60,
       "Position": [740, 420]
     }
@@ -139,6 +158,18 @@
         "keys",
         "mirror"
       ]
+    }
+  ],
+  "Puzzles": [
+    {
+      "Name": "fill-bowl",
+      "Remove": {
+        "Object": "bowl-empty"
+      },
+      "Add": {
+        "Object": "bowl-filled",
+        "Scene": "Bedroom"
+      }
     }
   ]
 }

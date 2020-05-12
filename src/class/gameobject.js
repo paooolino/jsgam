@@ -210,11 +210,10 @@ this.timeoutID;
 
   //Object drag/touch ends
   release(){
-    console.log('release');
-    console.log('interaction:', this.interaction);
     if(this.timeoutID) clearTimeout(this.timeoutID);
 
     if(this.interaction){
+      console.log(this.interaction.button, this.holding);
       let moveTo={x:this.posX,y:this.posY};
       //Check if we take it
       if(collision(this.sprite,this.game.inventory.icon) && this.config.Take){

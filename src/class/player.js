@@ -52,7 +52,11 @@ class Player extends Character{
   take(){
     this.lock=true;
     this.animate(this.animations.Take,1);
-    this.sprite.once(this.event.COMPLETE, this.takeEnd, this);
+    if (this.sprite) {
+      this.sprite.once(this.event.COMPLETE, this.takeEnd, this);
+    } else {
+      this.takeEnd();
+    }
   }
 
   takeEnd(){
@@ -73,7 +77,11 @@ class Player extends Character{
   use(){
     this.lock=true;
     this.animate(this.animations.Use,1);
-    this.sprite.once(this.event.COMPLETE, this.useEnd, this);
+    if (this.sprite) {
+      this.sprite.once(this.event.COMPLETE, this.useEnd, this);
+    } else {
+      this.useEnd();
+    }
   }
 
   useEnd(){
